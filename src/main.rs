@@ -38,17 +38,20 @@ fn new_item(args: Vec<String>) -> Result<()> {
         .unwrap();
 
     file.write(final_json.as_bytes()).unwrap();
+    println!("Your task was added.");
 
     Ok(())
 }
 
 fn new_checklist(args: Vec<String>) -> Result<()> {
     File::create_new("checklist.chk").unwrap();
+    println!("Your checklist was created");
 
     Ok(())
 }
 
 fn complete_item(args: Vec<String>) -> Result<()> {
+    let mut was_complete = false;
     let mut task_name_split = args.clone();
     task_name_split.drain(0..2);
     let task_name = task_name_split.join(" ");
@@ -64,12 +67,16 @@ fn complete_item(args: Vec<String>) -> Result<()> {
     for tsk in items.iter_mut() {
         if tsk.name == task_name {
             tsk.completed = true;
+            was_complete = true;
         }
         let task_json = serde_json::to_string(&tsk)?;
         file_output = format!("{}{}\n", file_output, task_json);
     }
 
-    println!("{}", file_output);
+    if !was_complete {
+        println!("There was no task named: {}", task_name);
+    }
+
     let mut file = OpenOptions::new()
         .write(true)
         .append(false)
@@ -82,6 +89,7 @@ fn complete_item(args: Vec<String>) -> Result<()> {
 }
 
 fn uncomplete_item(args: Vec<String>) -> Result<()> {
+    let mut was_complete = false;
     let mut task_name_split = args.clone();
     task_name_split.drain(0..2);
     let task_name = task_name_split.join(" ");
@@ -97,9 +105,14 @@ fn uncomplete_item(args: Vec<String>) -> Result<()> {
     for tsk in items.iter_mut() {
         if tsk.name == task_name {
             tsk.completed = false;
+            was_complete = true;
         }
         let task_json = serde_json::to_string(&tsk)?;
         file_output = format!("{}{}\n", file_output, task_json);
+    }
+
+    if !was_complete {
+        println!("There was no task named: {}", task_name);
     }
 
     let mut file = OpenOptions::new()
@@ -114,7 +127,6 @@ fn uncomplete_item(args: Vec<String>) -> Result<()> {
 }
 
 fn display_list(args: Vec<String>) -> Result<()> {
-
     let raw_data = std::fs::read_to_string("checklist.chk").unwrap();
     let split_data = raw_data.split('\n').take_while(|x| x.len() > 0);
     let mut items: Vec<Task> = split_data
@@ -133,6 +145,7 @@ fn display_list(args: Vec<String>) -> Result<()> {
 }
 
 fn remove_task(args: Vec<String>) -> Result<()> {
+    let mut was_complete = false;
     let mut task_name_split = args.clone();
     task_name_split.drain(0..2);
     let task_name = task_name_split.join(" ");
@@ -149,7 +162,13 @@ fn remove_task(args: Vec<String>) -> Result<()> {
         if tsk.name != task_name {
             let task_json = serde_json::to_string(&tsk)?;
             file_output = format!("{}{}\n", file_output, task_json);
+        } else {
+            was_complete = true;
         }
+    }
+
+    if !was_complete {
+        println!("There was no task named: {}", task_name);
     }
 
     let mut file = OpenOptions::new()
@@ -164,6 +183,7 @@ fn remove_task(args: Vec<String>) -> Result<()> {
 }
 
 fn get_details(args: Vec<String>) -> Result<()> {
+    let mut was_complete = false;
     let mut task_name_split = args.clone();
     task_name_split.drain(0..2);
     let task_name = task_name_split.join(" ");
@@ -179,7 +199,12 @@ fn get_details(args: Vec<String>) -> Result<()> {
         if tsk.name == task_name {
             println!("{}:", tsk.name.bold().underline());
             println!("  >{}", tsk.info);
+            was_complete = true;
         }
+    }
+
+    if !was_complete {
+        println!("There was no task named: {}", task_name);
     }
 
     Ok(())
