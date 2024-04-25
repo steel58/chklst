@@ -222,6 +222,7 @@ fn main() {
         "list" | "l" => display_list(args),
         "remove" | "r" => remove_task(args),
         "details" | "d" => get_details(args),
-        _ => Ok(()),
+        _ => {println!("There is not command: {command}");
+        Ok(())},
     };
 }
