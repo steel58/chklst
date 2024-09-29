@@ -23,3 +23,5 @@ Commands are supplied when running chklst ex) "chklst add".
 
 "chklst details name": This provides any added information you provided when creating the task with name "name".
 *Note* d is an alias for details
+
+"chklst help": Provides information on all chklst commands.
